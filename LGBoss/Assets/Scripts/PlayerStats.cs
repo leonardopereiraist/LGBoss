@@ -4,8 +4,10 @@ using UnityEngine.UIElements;
 public class PlayerStats : MonoBehaviour
 {
     [SerializeField] HSB HSB;
-    public float maxHp, maxStam, damageTest, spendTest;
-    private float hp, stam;
+    public float maxHp, maxStam, damageTest, spendTest, hp, stam, stamRegen;
+    private float regenTimer = 0f;
+    [SerializeField] private float regenDelay = 0.5f;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -15,9 +17,31 @@ public class PlayerStats : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (regenTimer > 0)
+        {
+            regenTimer -= Time.deltaTime;
+        }
+        else if (stam < maxStam)
+        {
+            stam += stamRegen * Time.deltaTime;
+            HSB.setStam(stam/maxStam);
+
+        }
     }
 
+    public bool SpendStamina(float amount)
+    {  
+        if (stam >= amount)
+        {
+            stam -= amount;
+            regenTimer = regenDelay;
+            HSB.setStam(stam/maxStam);
+            return true;
+        }
+        return false;
+    }    
+    
+    #region Cheats
     [ContextMenu("Heal")]
     public void Heal()
     {
@@ -44,15 +68,5 @@ public class PlayerStats : MonoBehaviour
         HSB.setStam(1);
 
     }
-    [ContextMenu("Test Spend")]
-    public void TestSpend()
-    {
-        spendStamina(spendTest);
-    }
-
-        public void spendStamina(float spend)
-    {
-        stam -= spend;
-        HSB.setStam(stam/maxStam);
-    }
+    #endregion
 }
